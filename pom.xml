@@ -31,6 +31,24 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+				<cloudHubDeployment>
+						<uri>https://anypoint.mulesoft.com</uri>
+						<muleVersion>4.4.0</muleVersion>
+						<username>apiseroB48</username>
+						<password>apiseroB48</password>
+						<applicationName>syscarbooking</applicationName>
+						<businessGroup>apisero</businessGroup>
+						<workerType>micro</workerType>
+						<workers>1</workers>
+						<environment>Sandbox</environment>
+						<properties>
+							<anypoint.platform.config.analytics.agent.enabled>false</anypoint.platform.config.analytics.agent.enabled>
+							<anypoint.platform.client_id>ef25bcfe7b284ad99495777eea524ff1</anypoint.platform.client_id>
+							<secure.key>123456789</secure.key>
+							<anypoint.platform.client_secret>4a58691D4AB545629D6674AB736EA343</anypoint.platform.client_secret>
+						</properties>
+						<objectStoreV2>true</objectStoreV2>
+					</cloudHubDeployment>
 					<classifier>mule-application</classifier>
 				</configuration>
 			</plugin>
@@ -50,28 +68,15 @@
 				</executions>
 				<configuration>
 					<coverage>
-						<runCoverage>true</runCoverage>
+					<ignoreFiles>
+	  <ignoreFile>new-test-suite.xml</ignoreFile>
+  </ignoreFiles>
+						
 						<formats>
 							<format>html</format>
 						</formats>
 					</coverage>
-					<cloudHubDeployment>
-						<muleVersion>4.4.0</muleVersion>
-						<username>apiseroB48</username>
-						<password>apiseroB48</password>
-						<applicationName>syscarbooking</applicationName>
-						<businessGroup>apisero</businessGroup>
-						<workerType>micro</workerType>
-						<workers>1</workers>
-						<environment>Sandbox</environment>
-						<properties>
-							<anypoint.platform.config.analytics.agent.enabled>false</anypoint.platform.config.analytics.agent.enabled>
-							<anypoint.platform.client_id>ef25bcfe7b284ad99495777eea524ff1</anypoint.platform.client_id>
-							<secure.key>123456789</secure.key>
-							<anypoint.platform.client_secret>4a58691D4AB545629D6674AB736EA343</anypoint.platform.client_secret>
-						</properties>
-						<objectStoreV2>true</objectStoreV2>
-					</cloudHubDeployment>
+					
 					<classifier>mule-application</classifier>
 				</configuration>
 			</plugin>
