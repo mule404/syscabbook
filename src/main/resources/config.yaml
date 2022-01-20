@@ -1,0 +1,21 @@
+s3:
+  accessKey: "![dk/ESIChwgjMEAOicB4VICt/b38MQLkM]"
+  secretKey: "![X1DzFOjTAlvjLmDtoBeiQ8nPGbjJ2SbHfuUK9Q8SJnuO8/WMn8SDz+38IEVhxWYm]"
+
+json:
+  logger:
+    application:
+      name: "sys_carbooking"
+      version: "v1"
+
+mule:
+  env: "test"
+  
+http:
+  port: "8089"
+  
+anypointstudio:
+  username: "RakeshPapisero2021"
+  password: "![oznslgqNkc6TebH2NImk/A==]"
+  cldhubdomainname: "bmhcarbooking"
+  APIID: "17572499"

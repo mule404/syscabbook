@@ -1,0 +1,18 @@
+%dw 2.0
+
+type auto_2ca88292_2cf7_4b87_8cb7_a4606838c292_Input_Payload = {
+  carNumber: String, 
+  vendorfileName: String, 
+  bucketName: String, 
+  partnerName: "OLA" | "UBER", 
+  bookingDateTime: String, 
+  noOfDaysToBook: Number, 
+  customerdetails: {
+    address: String, 
+    mobile: Number, 
+    fullName: String, 
+    _?: Any
+  }, 
+  _?: Any
+}
+

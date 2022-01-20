@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:s3="http://www.mulesoft.org/schema/mule/s3"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getCarddetails" doc:id="5a53038c-9481-40d4-9abe-c5d7e636cdef" >
+		<json-logger:logger doc:name="Logger" doc:id="df45ace2-40dc-4395-aafe-7c8941fb799b" config-ref="JSON_Logger_Config" message='#["sys carbooking: GET operation initiated at ="++ now() as String]'/>
+		<logger level="INFO" doc:name="Logger" doc:id="86d7dc10-85c4-42f3-9122-901fabc62aa3" message="#[payload]"/>
+		<s3:get-object doc:name="Get object" doc:id="9ef5e459-2247-4e8b-96c8-d92bd8e7864f" config-ref="Amazon_S3_Configuration" bucketName="#[attributes.queryParams.s3Bucketname]" key="#[attributes.queryParams.s3Keyname]"/>
+		<choice doc:name="Choice" doc:id="a12458a8-aadb-4c2f-a104-2fbd51a365c0" >
+			<when expression="#[isEmpty(payload) == true]">
+				<json-logger:logger doc:name="Logger" doc:id="c3b4063e-23a9-4586-addd-74742712627b" config-ref="JSON_Logger_Config" message='#["no data received in GET operation"++ now() as String]'/>
+				<ee:transform doc:name="Transform Message" doc:id="ac2bfc31-21d6-41c1-8209-fdb877f3fc9b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "no data found"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<json-logger:logger doc:name="Logger" doc:id="f619f292-9afa-41e8-98c9-cab6d80c6ba8" config-ref="JSON_Logger_Config" message='#["sys carbooking: GET operation completed and received required data ="++ now() as String]'/>
+			</otherwise>
+		</choice>
+		<json-logger:logger doc:name="Logger" doc:id="058d0e12-83a6-44f2-b61e-21b85c442e1c" config-ref="JSON_Logger_Config" message='#["sys carbooking: GET operation completed at ="++ now() as String]'/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5eb4aece-f38a-435c-8fcd-0b3434455536" type="ANY">
+				<json-logger:logger doc:name="Logger" doc:id="ff935908-9b90-4359-844f-eade755e434f" config-ref="JSON_Logger_Config" message='#["error occured in getCardetails at "++ now() as String]'/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="postcar" doc:id="2ca88292-2cf7-4b87-8cb7-a4606838c292" >
+		<json-logger:logger doc:name="Logger" doc:id="1ae39827-b449-4e96-843c-b6bb5ac5db1d" config-ref="JSON_Logger_Config" message='#["sys carbooking: POST operation initiated at ="++ now() as String]'/>
+		<s3:create-object doc:name="Create object" doc:id="df93498c-9bcc-49a5-8c80-4d51964e8b22" config-ref="Amazon_S3_Configuration" bucketName="#[payload[0].bucketName as String]" key="#[payload[0].vendorfileName as String]">
+			<s3:object-content ><![CDATA[#[%dw 2.0
+output application/csv header=true
+---
+payload map{
+"carNumber": $.carNumber ,
+"noOfDaysToBook": $.noOfDaysToBook ,
+"name": $.fullName ,
+"mobile": $.mobile ,
+"address": $.address,
+"bookingDateTime": now()
+}]]]></s3:object-content>
+		</s3:create-object>
+		<json-logger:logger doc:name="Logger" doc:id="c14c6e96-0d14-41ef-9e4a-7af8ee14cb4c" config-ref="JSON_Logger_Config" message='#["sys carbooking: POST operation completed at ="++ now() as String]'/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="297f5cb3-f3db-42cc-8b9c-2cc7c6fbcec9" type="ANY">
+				<json-logger:logger doc:name="Logger" doc:id="58e1d8a3-72be-43a7-8df9-dddbed1f52b8" config-ref="JSON_Logger_Config" message='#["error occured in postCardetails at "++ now() as String]'/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

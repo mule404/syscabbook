@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:s3="http://www.mulesoft.org/schema/mule/s3" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<s3:config name="Amazon_S3_Configuration" doc:name="Amazon S3 Configuration" doc:id="25d92be0-ac4f-4271-b1e9-afd2d028c4d8" >
+		<s3:basic-connection accessKey="${secure::s3.accessKey}" secretKey="${secure::s3.secretKey}"/>
+	</s3:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="5de09a66-c0e6-48eb-aaa7-e1ad9e4eeb9b" file="config.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="e6436eb0-4dcd-4cfc-8ee2-d3b21943c520" file="config.yaml" key="123456789" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<cloudhub:config name="CloudHub_Config" doc:name="CloudHub Config" doc:id="870fe44e-4537-4059-baca-00e984ebb08f" >
+		<cloudhub:connection username="${anypointstudio.username}" password="${secure::anypointstudio.password}"/>
+	</cloudhub:config>
+	<api-gateway:autodiscovery apiId="${anypointstudio.APIID}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="7e5c5139-d7fa-490e-9f9c-eceed3e58d41" flowRef="sys_carbooking-main" />
+</mule>

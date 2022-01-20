@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+	<error-handler name="errorError_Handler" doc:id="5c374fa7-793e-4975-a864-fd7d9f5f45a4" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2b88709f-2f7b-4640-aea4-d938f94f5115" >
+			<choice doc:name="Choice" doc:id="4c7d1b57-0bcc-4262-a653-afedf8abbed5" >
+				<when expression="#[error.errorType.namespace=='APIKIT']">
+					<choice doc:name="Choice" doc:id="93082adb-0781-4089-a114-a0809cbadc22" >
+						<when expression="#[error.errorType.identifier=='BAD_REQUEST']">
+							<ee:transform doc:name="APIKIT:BAD_REQUEST" doc:id="6700f570-a47f-4e89-9617-d2ae06fc3228" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<set-variable value="400" doc:name="Set Variable" doc:id="f3465a51-c578-40ba-b17e-bdf56619dee9" variableName="httpStatus"/>
+						</when>
+						<when expression='#[error.errorType.identifier== "NOT_FOUND"]'>
+							<ee:transform doc:name="APIKIT:RESOURCE_NOT_FOUND" doc:id="40998811-3cfe-49d6-a1e9-2a76ade1963d" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</when>
+						<when expression='#[error.errorType.identifier=="METHOD_NOT_ALLOWED"]'>
+							<ee:transform doc:name="APIKIT:METHOD_NOT_ALLOWED" doc:id="d11f7285-f171-4b4d-ad61-518b5ff6159c" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</when>
+						<when expression='#[error.errorType.identifier=="UNSUPPORTED_MEDIA_TYPE"]'>
+							<ee:transform doc:name="APIKIT:UNSUPPORTED_MEDIA" doc:id="ca2030c1-da2e-4a93-895d-07ca1ed2304a" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</when>
+						<when expression='#[error.errorType.identifier=="NOT_IMPLEMENTED"]'>
+							<ee:transform doc:name="APIKIT:NOT_IMPLEMENTED" doc:id="fe30b3c2-d142-4012-bfb5-0c63264bf938" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</when>
+					</choice>
+				</when>
+				<when expression='#[error.errorType.namespace =="S3"]'>
+					<ee:transform doc:name="Transform Message" doc:id="b850843c-0a12-4a46-b44b-f7736fd4c8fb" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<cloudhub:create-notification doc:name="S3 AWS error" doc:id="399f1ead-8feb-450f-bfd8-49355d7de07a" config-ref="CloudHub_Config" domain="${anypointstudio.cldhubdomainname}">
+						<cloudhub:message ><![CDATA[#["Error occured in S3 Amazon connectivity" ++ now() as String]]]></cloudhub:message>
+					</cloudhub:create-notification>
+				</when>
+				<otherwise >
+					<ee:transform doc:name="Transform Message" doc:id="f9a82a38-b4e6-4174-91a8-ad19d45ee39a" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "internal error"
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</otherwise>
+			</choice>
+		</on-error-propagate>
+	</error-handler>
+</mule>

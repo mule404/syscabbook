@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-suite.xml" />
+	<munit:test name="getCarddetails-test" doc:id="0b5a60b0-182a-4168-9c19-1598bbc6bb4c" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="a95fd4f7-b5f1-4cbd-844f-784cf6c64b80" >
+				<munit:payload value="#[readUrl('classpath://getCarddetailstest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getCarddetailstest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getCarddetailstest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getCarddetails" doc:id="1fd91dc6-2fce-4f7f-b8ee-0390a4035cbf" name="getCarddetails"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="a2b43bfe-72a9-49d9-a52d-6ef427e44638" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getCarddetailstest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="postcar-test" doc:id="dbf37ed4-549c-494d-abd1-07425fc74f56" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Create object" doc:id="6557add3-292c-481b-b080-aec59a7b5d69" processor="s3:create-object">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="df93498c-9bcc-49a5-8c80-4d51964e8b22" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://postcartest\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://postcartest\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="e5c4307d-6203-42df-8738-395440dc085b" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postcartest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postcartest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://postcartest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to postcar" doc:id="1d736a47-d200-4c0a-9d21-262763489aa3" name="postcar"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="4290a7f1-dd59-4e8b-ac44-3c52d70687aa" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postcartest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="getCarddetails-test1" doc:id="44325855-d4d8-47d4-bfb0-5c7199106653" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get object" doc:id="92764b45-7e90-4f1b-a3da-7c01e46a686e" processor="s3:get-object">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9ef5e459-2247-4e8b-96c8-d92bd8e7864f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/csv --- readUrl('classpath://getCarddetailstest1\mock_payload.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://getCarddetailstest1\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://getCarddetailstest1\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="869ef239-6f20-4230-b055-65aa0974cf43" >
+				<munit:payload value="#[readUrl('classpath://getCarddetailstest1\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getCarddetailstest1\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://getCarddetailstest1\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getCarddetails" doc:id="c54c36d8-5848-4832-b1d0-a8ebad4026ad" name="getCarddetails"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="44731d9b-9f6c-4cb2-b8fe-3bbd0f387ab1" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getCarddetailstest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

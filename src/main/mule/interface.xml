@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:s3="http://www.mulesoft.org/schema/mule/s3" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/s3 http://www.mulesoft.org/schema/mule/s3/current/mule-s3.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    <http:listener-config name="sys_carbooking-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+    <apikit:config name="sys_carbooking-config" api="sys_carbooking.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="a6b322e0-54da-4673-babf-720c7d5e05a1" environment="${mule.env}" disabledFields="content"/>
+	<flow name="sys_carbooking-main" doc:id="1c312e27-744c-4547-b973-a3cc5bb0ddc3">
+        <http:listener config-ref="sys_carbooking-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="sys_carbooking-config" doc:id="df7880b6-50e9-4655-a62a-2d65cd87b845"/>
+    </flow>
+    <flow name="sys_carbooking-console">
+        <http:listener config-ref="sys_carbooking-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="sys_carbooking-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\car:sys_carbooking-config">
+		<flow-ref doc:name="Flow Reference" doc:id="7d60425a-f8b0-4638-bb24-029d054434e0" name="getCarddetails"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="de81af49-3401-47eb-8d5c-c0009c538509" >
+				<json-logger:logger doc:name="Logger" doc:id="7fee0a3a-368c-4611-a133-e29ce7b22069" config-ref="JSON_Logger_Config" message='#["error occured in getcardetails" ++ now()]'/>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+    <flow name="post:\car:application\json:sys_carbooking-config">
+        <flow-ref doc:name="Flow Reference" doc:id="1689cf1b-eb94-4efe-8bfa-06fe6ee61ba4" name="postcar"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  messagecode: 201,
+  message: "success"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2feede89-37ec-4578-b190-56da9b11547a" type="ANY">
+				<json-logger:logger doc:name="Logger" doc:id="ba2f7343-50d4-477e-a259-3f40e0e91775" config-ref="JSON_Logger_Config" message='#["error occured in post car" ++ now() as String]'/>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+</mule>
