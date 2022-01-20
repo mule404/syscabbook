@@ -69,7 +69,8 @@
 				<configuration>
 					<coverage>
 					<ignoreFiles>
-	  <ignoreFile>new-test-suite.xml</ignoreFile>
+	  <ignoreFile>interface-suite.xml</ignoreFile>
+	  <ignoreFile>implementation-suite.xml</ignoreFile>
   </ignoreFiles>
 						
 						<formats>
